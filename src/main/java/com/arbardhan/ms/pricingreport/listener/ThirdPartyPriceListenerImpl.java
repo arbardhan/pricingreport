@@ -42,11 +42,10 @@ public class ThirdPartyPriceListenerImpl implements PriceListener,ApplicationEve
 	 */
 		
 		long time = System.currentTimeMillis();
-		long difference = (oldTime==0)?0:(time-oldTime);
-		System.out.println("Time difference for second event "+TimeUnit.MILLISECONDS.toSeconds(difference) );
+		long difference = (oldTime==0)?0:(time-oldTime);		
 		if(TimeUnit.MILLISECONDS.toSeconds(difference) > 29)
 		{
-			System.out.println("Publish 2nd Stream");
+			System.out.println("First Record of next Stream - sends events for calculation");
 			thirdPartyQueue.drainTo(thirdPartyQueueforCalculation);
 			thirdPartyQueueforCalculation.drainTo(thirdPartyQueueforCalulationSentOut);			
 			ThirdPartyServiceFirstRecordOfNextStream event2 = new ThirdPartyServiceFirstRecordOfNextStream(this);
@@ -55,13 +54,13 @@ public class ThirdPartyPriceListenerImpl implements PriceListener,ApplicationEve
 		
 		//System.out.println("TP Time is "+time+" Symbol is "+symbol + " Price is +" + price);
 		if(thirdPartyQueue.size() == 0 )
-		{	System.out.println("THE TP QUEUE SIZE IS ZERO AND VARIABLE SET TO TRUE");
+		{	System.out.println("TP queue is zero. Publish event for Bank to cutoff and drain");
 			oldTime=time;
 			ThirdPartyServiceFirstRecordOfCurrentStream event = new ThirdPartyServiceFirstRecordOfCurrentStream(this);
 			publisher.publishEvent(event);
 		}		
-		thirdPartyQueue.add(getPriceObject(symbol,price,time));		
-		System.out.println("Add Price to TP partent Queue size "+thirdPartyQueue.size() );		
+		thirdPartyQueue.add(getPriceObject(symbol,price,time));	
+			
 	}
 	
 	private static PriceObject getPriceObject(String symbol, double price, long time)
@@ -69,7 +68,6 @@ public class ThirdPartyPriceListenerImpl implements PriceListener,ApplicationEve
 	
 	public BlockingQueue<PriceObject> getThirdPartyCalcQueue()
 	{
-		System.out.println("TP queue size" +thirdPartyQueueforCalulationSentOut.size());
 		return thirdPartyQueueforCalulationSentOut; 		
 	}
 
